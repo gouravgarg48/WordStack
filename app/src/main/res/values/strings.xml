@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">WordStack</string>
+
+    <string name="instructions">1. Enter size of each word and hit PLAY button to start WordStack game.\n2.
+        Click on empty fields or Drag letters to shift them to fields.\n3. Use BACK button to undo your move.\n4.
+        Use HINT button to know one word from two.\n5. Hit RESET button to restart game.</string>
+
+    <string name="tab1">Dictionary</string>
+    <string name="tab2">Game</string>
+
+</resources>
