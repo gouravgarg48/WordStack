@@ -34,9 +34,9 @@ public class DictionaryFragment extends Fragment {
             public void onClick(View v) {
                 SearchActivity ob = new SearchActivity();
                 TextView word_of_day = (TextView) rootView.findViewById(R.id.word_of_day);
-                ob.searchWord(word_of_day.getText().toString());
-                Intent i = new Intent(rootView.getContext(), SearchActivity.class);
-                startActivity(i);
+//                ob.searchWord(word_of_day.getText().toString());
+//                Intent i = new Intent(rootView.getContext(), SearchActivity.class);
+//                startActivity(i);
             }
         });
         getDate();

@@ -11,7 +11,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -39,17 +38,17 @@ public final class QueryUtils {
     /**
      * Query the OD dataset and return a {@link String} object.
      */
-    public static String fetchDefinition(String requestUrl, String queryWord) throws IOException{
+    public static String fetchDefinition(String requestUrl, String queryWord) throws IOException {
         Log.i(LOG_TAG, "TEST: fetchDefinition() called ...");
 
         URL url = createUrl(requestUrl);
         HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
 
-        urlConnection.addRequestProperty("Accept","application/json");
-        urlConnection.addRequestProperty("app_id",app_id);
-        urlConnection.addRequestProperty("app_key",app_key);
+        urlConnection.addRequestProperty("Accept", "application/json");
+        urlConnection.addRequestProperty("app_id", app_id);
+        urlConnection.addRequestProperty("app_key", app_key);
 
-        Log.v(LOG_TAG,  "For Url: " + url.toString());
+        Log.v(LOG_TAG, "For Url: " + url.toString());
 
         // Perform HTTP request to the URL and receive a JSON response back
         String jsonResponse = null;
@@ -61,20 +60,48 @@ public final class QueryUtils {
         }
 
         // Extract relevant fields from the JSON response and create a {@link String}
-        String definition = extractFeatureFromJson(jsonResponse);
+        String definition = extractDefinitionFromJson(jsonResponse);
 
         // Return the {@link String}
         return definition;
+    }
+
+    public static String fetchDetails(String requestUrl, String queryWord) throws IOException {
+        Log.i(LOG_TAG, "TEST: fetchDetails() called ...");
+
+        URL url = createUrl(requestUrl);
+        HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+
+        urlConnection.addRequestProperty("Accept", "application/json");
+        urlConnection.addRequestProperty("app_id", app_id);
+        urlConnection.addRequestProperty("app_key", app_key);
+
+        Log.v(LOG_TAG, "For Url: " + url.toString());
+
+        // Perform HTTP request to the URL and receive a JSON response back
+        String jsonResponse = null;
+
+        try {
+            jsonResponse = makeHttpRequest(urlConnection);
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Problem making the HTTP request.", e);
+        }
+
+        // Extract relevant fields from the JSON response and create a {@link String}
+        String details = extractDetailsFromJson(jsonResponse);
+
+        // Return the {@link String}
+        return details;
     }
 
     /**
      * Return a list of {@link String} objects that has been built up from
      * parsing a JSON response.
      */
-    public static String extractFeatureFromJson(String result) {
+    public static String extractDefinitionFromJson(String result) {
 
         // If the JSON string is empty or null, then return early.
-        if(TextUtils.isEmpty(result))
+        if (TextUtils.isEmpty(result))
             return null;
 
         // Create an empty String to store definition
@@ -88,11 +115,11 @@ public final class QueryUtils {
             // Create a JSONObject from the JSON response string
             JSONObject baseJSONResponse = new JSONObject(result);
 
-            // Extract the JSONObject associated with the key called "results",
+            // Extract the JSONObject associated with the key called "result",
             // which represents a list of results.
-            JSONObject resultsArrayJSONObject = baseJSONResponse.getJSONArray("results").getJSONObject(0);
+            JSONObject resultsJSONObject = baseJSONResponse.getJSONArray("results").getJSONObject(0);
 
-            JSONObject lexicalEntriesJSONObject = resultsArrayJSONObject.getJSONArray("lexicalEntries").getJSONObject(0);
+            JSONObject lexicalEntriesJSONObject = resultsJSONObject.getJSONArray("lexicalEntries").getJSONObject(0);
 
             JSONObject entriesJSONObject = lexicalEntriesJSONObject.getJSONArray("entries").getJSONObject(0);
 
@@ -111,6 +138,60 @@ public final class QueryUtils {
 
         // Return the list of definitions
         return definition;
+    }
+
+    public static String extractDetailsFromJson(String result) {
+
+        // If the JSON string is empty or null, then return early.
+        if (TextUtils.isEmpty(result))
+            return null;
+
+        // Create an empty String to store definition
+        String details = "";
+
+        // Try to parse the JSON response string. If there's a problem with the way the JSON
+        // is formatted, a JSONException exception object will be thrown.
+        // Catch the exception so the app doesn't crash, and print the error message to the logs.
+        try {
+
+            // Create a JSONObject from the JSON response string
+            JSONObject baseJSONResponse = new JSONObject(result);
+
+            // Extract the JSONObject associated with the key called "result",
+            // which represents a list of results.
+            JSONObject resultsJSONObject = baseJSONResponse.getJSONArray("results").getJSONObject(0);
+
+            JSONArray lexicalEntriesJSONArray = resultsJSONObject.getJSONArray("lexicalEntries");
+            for (int i = 0; i < lexicalEntriesJSONArray.length(); ++i) {
+                JSONObject lexicalEntriesJSONObject = lexicalEntriesJSONArray.getJSONObject(i);
+                details += "\n- " + lexicalEntriesJSONObject.getString("lexicalCategory");
+
+                JSONObject pronunciationsJSONObject = lexicalEntriesJSONObject.getJSONArray("pronunciations").getJSONObject(0);
+                details += " /" + pronunciationsJSONObject.getString("phoneticSpelling") + "/";
+
+                JSONArray entriesJSONArray = lexicalEntriesJSONObject.getJSONArray("entries");
+                for (int j = 0; j < entriesJSONArray.length(); ++j) {
+                    JSONObject entriesJSONObject = entriesJSONArray.getJSONObject(j);
+
+                    JSONArray sensesJSONArray = entriesJSONObject.getJSONArray("senses");
+                    for (int k = 0; k < sensesJSONArray.length(); ++k) {
+                        JSONObject sensesJSONObject = sensesJSONArray.getJSONObject(k);
+
+                        details += "\n\t" + (k+1) + ". " + (String) sensesJSONObject.getJSONArray("definitions").get(0);
+                        details += "\n\teg. " + (String) sensesJSONObject.getJSONArray("examples").getJSONObject(0).getString("text");
+                    }
+                }
+            }
+
+        } catch (JSONException e) {
+            // If an error is thrown when executing any of the above statements in the "try" block,
+            // catch the exception here, so the app doesn't crash. Print a log message
+            // with the message from the exception.
+            Log.e("QueryUtils", "Problem parsing the definitions JSON results", e);
+        }
+
+        // Return the list of definitions
+        return details;
     }
 
     /**
@@ -151,7 +232,7 @@ public final class QueryUtils {
                 jsonResponse = readFromStream(inputStream);
                 return jsonResponse;
             } else {
-                Log.e(LOG_TAG,"Error response code: " + urlConnection.getResponseCode());
+                Log.e(LOG_TAG, "Error response code: " + urlConnection.getResponseCode());
             }
         } catch (IOException e) {
             Log.e(LOG_TAG, "Problem retrieving the definition JSON results.", e);

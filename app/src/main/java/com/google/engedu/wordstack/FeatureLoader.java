@@ -9,12 +9,12 @@ import java.io.IOException;
  * Loads definitions by using an AsyncTask to perform the
  * network request to the given URL.
  */
-public class DefinitionLoader extends AsyncTaskLoader<String> {
+public class FeatureLoader extends AsyncTaskLoader<String> {
 
     /**
      * Tag for log messages
      */
-    private static final String LOG_TAG = DefinitionLoader.class.getName();
+    private static final String LOG_TAG = FeatureLoader.class.getName();
 
     /**
      * Query URL
@@ -27,16 +27,23 @@ public class DefinitionLoader extends AsyncTaskLoader<String> {
     private String mWord;
 
     /**
-     * Constructs a new {@link DefinitionLoader}.
+     * Query Type
+     */
+    private int mQType;
+
+    /**
+     * Constructs a new {@link FeatureLoader}.
      *
      * @param context of the activity
      * @param url     to load data from
-     * @param word    to load definition
+     * @param word    to load feature
+     * @param QType   for type of Query
      */
-    public DefinitionLoader(Context context, String url, String word) {
+    public FeatureLoader(Context context, String url, String word, int QType) {
         super(context);
         mUrl = url;
         mWord = word;
+        mQType = QType;
     }
 
     @Override
@@ -51,16 +58,19 @@ public class DefinitionLoader extends AsyncTaskLoader<String> {
         if (mUrl == null) {
             return null;
         }
-        String definition="";
+        String result="";
         try {
             // Perform the network request, parse the response, and extract definition.
-            definition = QueryUtils.fetchDefinition(mUrl, mWord);
-            if(definition != null)
-                Log.v(LOG_TAG, definition);
+            if(mQType == 1)
+                result = QueryUtils.fetchDetails(mUrl, mWord);
+            else
+                result = QueryUtils.fetchDefinition(mUrl, mWord);
+//            if(definition != null)
+//                Log.v(LOG_TAG, definition);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return definition;
+        return result;
     }
 
 }

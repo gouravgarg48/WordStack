@@ -104,7 +104,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         uriBuilder.appendQueryParameter("word_id", word.toLowerCase());
 
         String alternateUri = ODAPI_REQUEST_URL + "/en/" + word.toLowerCase().trim();
-        return new DefinitionLoader(this, alternateUri, word);
+        return new FeatureLoader(this, alternateUri, word, 1);
     }
 
     @Override
@@ -130,7 +130,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         TextView word_View = (TextView) findViewById(R.id.word);
         TextView def_View = (TextView) findViewById(R.id.def);
         word_View.setText(word);
-        def_View.setText("- " + result);
+        def_View.setText(result);
     }
 
     @Override

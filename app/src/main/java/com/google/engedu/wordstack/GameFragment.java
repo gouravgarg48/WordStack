@@ -418,7 +418,7 @@ public class GameFragment extends Fragment
 
         String alternateUri = ODAPI_REQUEST_URL + "/en/" + word.toLowerCase().trim();
 
-        return new DefinitionLoader(rootView.getContext(), alternateUri, word);
+        return new FeatureLoader(rootView.getContext(), alternateUri, word, 2);
     }
 
     @Override
