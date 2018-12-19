@@ -11,7 +11,7 @@
     <style name="CategoryTab" parent="Widget.Design.TabLayout">
         <item name="tabIndicatorColor">@android:color/white</item>
         <item name="tabSelectedTextColor">@android:color/white</item>
-        <item name="tabTextColor">@color/colorAccent</item>
+        <item name="tabTextColor">#EEEEEE</item>
         <item name="tabBackground">@color/colorTab</item>
     </style>
 </resources>

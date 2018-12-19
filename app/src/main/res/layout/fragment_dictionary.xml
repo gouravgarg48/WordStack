@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -9,49 +10,71 @@
         android:orientation="vertical">
 
         <LinearLayout
+            android:id="@+id/search"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorTab"
             android:orientation="horizontal"
+            android:background="@drawable/myrect"
+            android:elevation="2dp"
+            android:layout_margin="8dp"
             android:padding="8dp">
 
             <ImageView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
                 android:src="@drawable/ic_search2" />
-
-            <EditText
-                android:id="@+id/search"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Type here to Search..."
-                android:textColorHint="@color/colorAccent" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_margin="8dp"
-            android:background="@drawable/background">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
+                android:layout_margin="8dp"
                 android:textSize="20sp"
-                android:text="Word of the Day" />
+                android:textColor="@android:color/darker_gray"
+                android:text="Type here to Search..." />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/word_of_day_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:elevation="2dp"
+            android:background="@drawable/myrect"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:text="Word of the Day"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/Date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:text="Date"
+                    android:textSize="14sp" />
+            </RelativeLayout>
 
             <TextView
                 android:id="@+id/word_of_day"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:padding="8dp"
-                android:background="@color/colorTab"
-                android:textSize="28sp"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Body1"
-                android:text="Development" />
+                android:padding="16dp"
+                android:textColor="@android:color/white"
+                android:background="#8BC34A"
+                android:text="Development"
+                android:textSize="24sp" />
         </LinearLayout>
 
     </LinearLayout>

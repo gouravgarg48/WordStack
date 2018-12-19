@@ -177,7 +177,10 @@ public class GameFragment extends Fragment
                 case DragEvent.ACTION_DROP:
                     // Dropped, reassign Tile to the target Layout
                     LetterTile tile = (LetterTile) event.getLocalState();
-                    tile.moveToViewGroup((ViewGroup) v);
+                    if (!placedTiles.contains(tile)) {
+                        tile.moveToViewGroup((ViewGroup) v);
+                        placedTiles.push(tile);
+                    }
                     if (stackedLayout.empty()) {
                         loadDefinition();
                         checkAns();
@@ -188,8 +191,6 @@ public class GameFragment extends Fragment
                         ImageView hint = (ImageView) rootView.findViewById(R.id.hint);
                         hint.setVisibility(View.INVISIBLE);
                     }
-
-                    placedTiles.push(tile);
                     return true;
             }
             return false;
