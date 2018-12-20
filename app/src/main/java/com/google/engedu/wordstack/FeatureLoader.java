@@ -28,6 +28,9 @@ public class FeatureLoader extends AsyncTaskLoader<String> {
 
     /**
      * Query Type
+     *  = 1 for Details
+     *  = 2 for Definition
+     *  = 3 for Words
      */
     private int mQType;
 
@@ -43,6 +46,12 @@ public class FeatureLoader extends AsyncTaskLoader<String> {
         super(context);
         mUrl = url;
         mWord = word;
+        mQType = QType;
+    }
+
+    public FeatureLoader(Context context, String url, int QType) {
+        super(context);
+        mUrl = url;
         mQType = QType;
     }
 
@@ -63,8 +72,10 @@ public class FeatureLoader extends AsyncTaskLoader<String> {
             // Perform the network request, parse the response, and extract definition.
             if(mQType == 1)
                 result = QueryUtils.fetchDetails(mUrl, mWord);
-            else
+            else if(mQType == 2)
                 result = QueryUtils.fetchDefinition(mUrl, mWord);
+            else if(mQType == 3)
+                result = QueryUtils.fetchWords(mUrl);
 //            if(definition != null)
 //                Log.v(LOG_TAG, definition);
         } catch (IOException e) {

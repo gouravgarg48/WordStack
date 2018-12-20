@@ -33,6 +33,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -58,18 +59,21 @@ public class GameFragment extends Fragment
 
     private static int WORD_LENGTH = 5;
     private static int hintValue = 10;
+    private static int QType;
     public static final int LIGHT_BLUE = Color.rgb(176, 200, 255);
     public static final int LIGHT_GREEN = Color.rgb(200, 255, 200);
     private ArrayList<String> words = new ArrayList<>();
     private Random random = new Random();
     private StackedLayout stackedLayout;
     private static String word1, word2, definition1, definition2;
-    private Stack<LetterTile> placedTiles = new Stack<LetterTile>();
+    private Stack<LetterTile> placedTiles = new Stack();
     private View rootView;
+    private ViewGroup field1LinearLayout, field2LinearLayout;
 
-    private static final String ODAPI_REQUEST_URL = "https://od-api.oxforddictionaries.com:443/api/v1/entries";
-    private static final int DEFINITION_LOADER_ID1 = 1;
-    private static final int DEFINITION_LOADER_ID2 = 2;
+    //    private static final String ODAPI_WORDLIST_REQUEST_URL = "https://od-api.oxforddictionaries.com:443/api/v1/wordlist/";
+    private static final String ODAPI_ENTRIES_REQUEST_URL = "https://od-api.oxforddictionaries.com:443/api/v1/entries";
+    private static final int FEATURE_LOADER_ID1 = 1;
+    private static final int FEATURE_LOADER_ID2 = 2;
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -82,6 +86,9 @@ public class GameFragment extends Fragment
         ImageView reset = (ImageView) rootView.findViewById(R.id.reset);
         ImageView hint = (ImageView) rootView.findViewById(R.id.hint);
         ImageView instr = (ImageView) rootView.findViewById(R.id.instr);
+//        final EditText size = (EditText) rootView.findViewById(R.id.size);
+        Button submit = (Button) rootView.findViewById(R.id.submit);
+        submit.setEnabled(false);
 
         start.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,18 +120,38 @@ public class GameFragment extends Fragment
                 messageBox();
             }
         });
+//        size.setOnKeyListener(new View.OnKeyListener() {
+//            @Override
+//            public boolean onKey(View v, int keyCode, KeyEvent event) {
+//                // If the event is a key-down event on the "enter" button
+//                if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+//                        (keyCode == KeyEvent.KEYCODE_ENTER)) {
+//                    // Perform action on key press
+//                    WORD_LENGTH = Integer.parseInt(size.getText().toString());
+//                    loadWordsOnline();
+//                    return true;
+//                }
+//                return false;
+//            }
+//        });
+        submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onSubmit();
+            }
+        });
 
         LinearLayout verticalLayout = (LinearLayout) rootView.findViewById(R.id.vertical_layout);
         stackedLayout = new StackedLayout(rootView.getContext());
         verticalLayout.addView(stackedLayout, 3);
 
-        View word1LinearLayout = rootView.findViewById(R.id.word1);
-        word1LinearLayout.setOnTouchListener(new TouchListener());
-        word1LinearLayout.setOnDragListener(new DragListener());
+        field1LinearLayout = rootView.findViewById(R.id.field1);
+        field1LinearLayout.setOnTouchListener(new TouchListener());
+        field1LinearLayout.setOnDragListener(new DragListener());
 
-        View word2LinearLayout = rootView.findViewById(R.id.word2);
-        word2LinearLayout.setOnTouchListener(new TouchListener());
-        word2LinearLayout.setOnDragListener(new DragListener());
+        field2LinearLayout = rootView.findViewById(R.id.field2);
+        field2LinearLayout.setOnTouchListener(new TouchListener());
+        field2LinearLayout.setOnDragListener(new DragListener());
         return rootView;
     }
 
@@ -135,17 +162,6 @@ public class GameFragment extends Fragment
             if (motionEvent.getAction() == MotionEvent.ACTION_DOWN && !stackedLayout.empty()) {
                 LetterTile tile = (LetterTile) stackedLayout.peek();
                 tile.moveToViewGroup((ViewGroup) v);
-                if (stackedLayout.empty()) {
-                    loadDefinition();
-                    checkAns();
-
-                    ImageView play = (ImageView) rootView.findViewById(R.id.start);
-                    play.setEnabled(false);
-
-                    ImageView hint = (ImageView) rootView.findViewById(R.id.hint);
-                    hint.setVisibility(View.INVISIBLE);
-                }
-
                 placedTiles.push(tile);
                 return true;
             }
@@ -156,7 +172,7 @@ public class GameFragment extends Fragment
     private class DragListener implements View.OnDragListener {
 
         public boolean onDrag(View v, DragEvent event) {
-            int action = event.getAction();
+//            int action = event.getAction();
             switch (event.getAction()) {
                 case DragEvent.ACTION_DRAG_STARTED:
                     v.setBackgroundColor(LIGHT_BLUE);
@@ -181,60 +197,89 @@ public class GameFragment extends Fragment
                         tile.moveToViewGroup((ViewGroup) v);
                         placedTiles.push(tile);
                     }
-                    if (stackedLayout.empty()) {
-                        loadDefinition();
-                        checkAns();
-
-                        ImageView play = (ImageView) rootView.findViewById(R.id.start);
-                        play.setEnabled(false);
-
-                        ImageView hint = (ImageView) rootView.findViewById(R.id.hint);
-                        hint.setVisibility(View.INVISIBLE);
-                    }
                     return true;
             }
             return false;
         }
     }
 
-    public void loadWords(int length) {
+//    public void loadWordsOnline() {
+//        ConnectivityManager connMgr = (ConnectivityManager) rootView.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+//        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+//
+//        if (networkInfo != null && networkInfo.isConnected()) {
+//            LoaderManager loaderManager = getLoaderManager();
+//
+//            Bundle queryBundle = new Bundle();
+//            QType = 3;
+//            queryBundle.putInt("queryWordLength", WORD_LENGTH);
+//            queryBundle.putInt("queryType", QType);
+//
+//            // Get our Loader by calling getLoader and passing the ID we specified
+//            Loader<String> loader = loaderManager.getLoader(FEATURE_LOADER_ID1);
+//
+//            // If the Loader was null, initialize it. Else, restart it.
+//            if (loader == null) {
+//                loaderManager.initLoader(FEATURE_LOADER_ID1, queryBundle, this);
+//            } else {
+//                loaderManager.restartLoader(FEATURE_LOADER_ID1, queryBundle, this);
+//            }
+//        }
+//    }
+
+    public void loadWordsFromAssets() {
+        words = new ArrayList<>();
         AssetManager assetManager = rootView.getContext().getAssets();
-        words.clear();
         try {
             InputStream inputStream = assetManager.open("words.txt");
             BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
             String line = null;
             while ((line = in.readLine()) != null) {
                 String word = line.trim();
-                if (word.length() == length) {
+                if (word.length() == WORD_LENGTH) {
                     words.add(word);
                 }
             }
+
+            int index1 = random.nextInt(words.size());
+            int index2 = random.nextInt(words.size());
+            word1 = words.get(index1);
+            word2 = words.get(index2);
         } catch (IOException e) {
             Toast.makeText(rootView.getContext(), "Could not load dictionary", Toast.LENGTH_LONG).show();
         }
     }
 
     public boolean onStartGame() {
+        EditText size = (EditText) rootView.findViewById(R.id.size);
+        if (size.getText().length() == 0)
+            return false;
+
+        WORD_LENGTH = Integer.parseInt(size.getText().toString());
+        if(WORD_LENGTH > 10){
+            Toast.makeText(rootView.getContext(), "Enter size <= 10", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        size.setVisibility(View.GONE);
         ImageView play = (ImageView) rootView.findViewById(R.id.start);
         play.setEnabled(false);
+
+        ImageView undo = (ImageView) rootView.findViewById(R.id.undo);
+        undo.setEnabled(true);
+
+        Button submit = (Button) rootView.findViewById(R.id.submit);
+        submit.setEnabled(true);
 
         TextView messageBox = (TextView) rootView.findViewById(R.id.message_box);
         messageBox.setText("Game started...");
 
-        EditText size = (EditText) rootView.findViewById(R.id.size);
-        WORD_LENGTH = Integer.parseInt(size.getText().toString());
-        size.setVisibility(View.GONE);
-
         ImageView hint = (ImageView) rootView.findViewById(R.id.hint);
         hint.setVisibility(View.VISIBLE);
 
-        loadWords(WORD_LENGTH);
-
-        int index1 = random.nextInt(words.size());
-        int index2 = random.nextInt(words.size());
-        word1 = words.get(index1);
-        word2 = words.get(index2);
+//        loadWordsOnline();
+//        if (word1 == null || word2 == null)
+        loadWordsFromAssets();
 
         String word = "";
         for (int i = 0, j = 0; i < word1.length() || j < word2.length(); ) {
@@ -247,10 +292,8 @@ public class GameFragment extends Fragment
             }
         }
 
-        ViewGroup word1LinearLayout = rootView.findViewById(R.id.word1);
-        ViewGroup word2LinearLayout = rootView.findViewById(R.id.word2);
-        word1LinearLayout.removeAllViews();
-        word2LinearLayout.removeAllViews();
+        field1LinearLayout.removeAllViews();
+        field2LinearLayout.removeAllViews();
 
         stackedLayout.clear();
 
@@ -260,24 +303,31 @@ public class GameFragment extends Fragment
         return true;
     }
 
-    public boolean checkAns() {
-        View word1LinearLayout = rootView.findViewById(R.id.word1);
-        View word2LinearLayout = rootView.findViewById(R.id.word2);
 
-        Log.v(LOG_TAG, word1);
-        Log.v(LOG_TAG, word2);
+    public void onSubmit() {
+        if (!stackedLayout.empty()) {
+            Toast.makeText(getContext(), "Words Incomplete", Toast.LENGTH_SHORT).show();
+            return;
+        } else {
+            loadFeature();
+//            View word1LinearLayout = rootView.findViewById(R.id.field1);
+//            View word2LinearLayout = rootView.findViewById(R.id.field2);
+            String field1 = getWord(rootView.findViewById(R.id.field1));
+            String field2 = getWord(rootView.findViewById(R.id.field2));
 
-        String resultWord1 = getWord(word1LinearLayout);
-        String resultWord2 = getWord(word2LinearLayout);
+            if ((field1.equals(word1) && field2.equals(word2)) ||
+                    (field1.equals(word2) && field2.equals(word1))) {
+                AlertDialog alertDialog = new AlertDialog.Builder(rootView.getContext()).create();
+                alertDialog.setMessage("!! You Won !!");
+                alertDialog.show();
+            }
 
-        if ((resultWord1.equals(word1) && resultWord2.equals(word2)) ||
-                (resultWord1.equals(word2) && resultWord2.equals(word1))) {
-            AlertDialog alertDialog = new AlertDialog.Builder(rootView.getContext()).create();
-            alertDialog.setMessage("!! You Won !!");
-            alertDialog.show();
-            return true;
+            ImageView play = (ImageView) rootView.findViewById(R.id.start);
+            play.setEnabled(false);
+
+            ImageView hint = (ImageView) rootView.findViewById(R.id.hint);
+            hint.setVisibility(View.INVISIBLE);
         }
-        return false;
     }
 
     public boolean onUndo() {
@@ -301,19 +351,23 @@ public class GameFragment extends Fragment
         TextView messageBox = (TextView) rootView.findViewById(R.id.message_box);
         messageBox.setText("Enter size of word: ");
 
+        Button submit = (Button) rootView.findViewById(R.id.submit);
+        submit.setEnabled(false);
+
         EditText size = (EditText) rootView.findViewById(R.id.size);
         size.setVisibility(View.VISIBLE);
 
         ImageView play = (ImageView) rootView.findViewById(R.id.start);
         play.setEnabled(true);
 
-        ViewGroup word1LinearLayout = rootView.findViewById(R.id.word1);
-        word1LinearLayout.removeAllViews();
-        word1LinearLayout.setBackgroundColor(getResources().getColor(R.color.background));
+        ImageView undo = (ImageView) rootView.findViewById(R.id.undo);
+        undo.setEnabled(false);
 
-        ViewGroup word2LinearLayout = rootView.findViewById(R.id.word2);
-        word2LinearLayout.removeAllViews();
-        word2LinearLayout.setBackgroundColor(getResources().getColor(R.color.background));
+        field1LinearLayout.removeAllViews();
+        field1LinearLayout.setBackgroundColor(getResources().getColor(R.color.background));
+
+        field2LinearLayout.removeAllViews();
+        field2LinearLayout.setBackgroundColor(getResources().getColor(R.color.background));
 
         words.removeAll(words);
         stackedLayout.removeAllViews();
@@ -350,7 +404,7 @@ public class GameFragment extends Fragment
         return result;
     }
 
-    private void loadDefinition() {
+    private void loadFeature() {
         TextView message_Box_View = (TextView) rootView.findViewById(R.id.message_box);
         // Get a reference to the ConnectivityManager to check state of network connectivity
         ConnectivityManager connMgr = (ConnectivityManager) rootView.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -371,26 +425,29 @@ public class GameFragment extends Fragment
             // Create a bundle called queryBundle
             Bundle queryBundle1 = new Bundle();
             Bundle queryBundle2 = new Bundle();
+            QType = 2;
 
             // Use putString with queryWord as the key and the String value of the word
             queryBundle1.putString("queryWord", word1);
             queryBundle2.putString("queryWord", word2);
+            queryBundle1.putInt("queryType", QType);
+            queryBundle2.putInt("queryType", QType);
 
             // Get our Loader by calling getLoader and passing the ID we specified
-            Loader<String> loader1 = loaderManager.getLoader(DEFINITION_LOADER_ID1);
-            Loader<String> loader2 = loaderManager.getLoader(DEFINITION_LOADER_ID2);
+            Loader<String> loader1 = loaderManager.getLoader(FEATURE_LOADER_ID1);
+            Loader<String> loader2 = loaderManager.getLoader(FEATURE_LOADER_ID2);
 
             // If the Loader was null, initialize it. Else, restart it.
             if (loader1 == null) {
-                loaderManager.initLoader(DEFINITION_LOADER_ID1, queryBundle1, this);
+                loaderManager.initLoader(FEATURE_LOADER_ID1, queryBundle1, this);
             } else {
-                loaderManager.restartLoader(DEFINITION_LOADER_ID1, queryBundle1, this);
+                loaderManager.restartLoader(FEATURE_LOADER_ID1, queryBundle1, this);
             }
 
             if (loader2 == null) {
-                loaderManager.initLoader(DEFINITION_LOADER_ID2, queryBundle2, this);
+                loaderManager.initLoader(FEATURE_LOADER_ID2, queryBundle2, this);
             } else {
-                loaderManager.restartLoader(DEFINITION_LOADER_ID2, queryBundle2, this);
+                loaderManager.restartLoader(FEATURE_LOADER_ID2, queryBundle2, this);
             }
 
         } else {
@@ -408,17 +465,35 @@ public class GameFragment extends Fragment
         View loadingIndicator = rootView.findViewById(R.id.loading_indicator);
         loadingIndicator.setVisibility(View.VISIBLE);
 
-        String word = args.getString("queryWord");
+        if (args.getInt("queryType") == 2) {
+            String word = args.getString("queryWord");
 
-        Uri baseUri = Uri.parse(ODAPI_REQUEST_URL);
-        Uri.Builder uriBuilder = baseUri.buildUpon();
+            Uri baseUri = Uri.parse(ODAPI_ENTRIES_REQUEST_URL);
+            Uri.Builder uriBuilder = baseUri.buildUpon();
 
-        uriBuilder.appendQueryParameter("language", "en");
-        uriBuilder.appendQueryParameter("word_id", word.toLowerCase());
+            uriBuilder.appendPath("en");
+            uriBuilder.appendPath(word.toLowerCase());
 
-        String alternateUri = ODAPI_REQUEST_URL + "/en/" + word.toLowerCase().trim();
-
-        return new FeatureLoader(rootView.getContext(), alternateUri, word, 2);
+            String alternateUri = uriBuilder.toString();
+            return new FeatureLoader(rootView.getContext(), alternateUri, word, 2);
+        }
+// else if (args.getInt("queryType") == 3) {
+//            final String language = "en";
+//            final String filters = "lexicalCategory=Noun";
+//
+//            int length = args.getInt("queryWordLength");
+//
+//            Uri baseUri = Uri.parse(ODAPI_WORDLIST_REQUEST_URL);
+//            Uri.Builder uriBuilder = baseUri.buildUpon();
+//
+//            uriBuilder.appendPath(language);
+//            uriBuilder.appendPath(filters);
+//            uriBuilder.appendQueryParameter("word_length", Integer.toString(length));
+//
+//            String alternateUri = uriBuilder.toString();
+//            return new FeatureLoader(rootView.getContext(), alternateUri, QType);
+//        }
+        return null;
     }
 
     @Override
@@ -429,15 +504,23 @@ public class GameFragment extends Fragment
 
         Log.i(LOG_TAG, "TEST: onLoadFinished() called ...");
 
-        // If there is a valid {@link definition}, then update TextView
-        if (definition != null && !definition.isEmpty()) {
-            if (loader.getId() == 1) definition1 = definition;
-            else if (loader.getId() == 2) definition2 = definition;
-        } else {
-            if (loader.getId() == 1) definition1 = null;
-            else if (loader.getId() == 2) definition2 = null;
+        if (QType == 2) {
+            // If there is a valid {@link definition}, then update TextView
+            if (definition != null && !definition.isEmpty()) {
+                if (loader.getId() == 1) definition1 = definition;
+                else if (loader.getId() == 2) definition2 = definition;
+            } else {
+                definition1 = definition2 = null;
+            }
+            displayResults();
         }
-        displayResults();
+//        else if (QType == 3) {
+//            if (result != null && !result.isEmpty()) {
+//                String results[] = result.split("\n");
+//                word1 = results[0];
+//                word2 = results[1];
+//            }
+//        }
     }
 
     @Override

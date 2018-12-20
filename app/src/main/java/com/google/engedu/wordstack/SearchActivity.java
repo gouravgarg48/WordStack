@@ -19,8 +19,8 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     private static final String LOG_TAG = MainActivity.class.getName();
     private static String word;
 
-    private static final String ODAPI_REQUEST_URL = "https://od-api.oxforddictionaries.com:443/api/v1/entries";
-    private static final int DEFINITION_LOADER_ID1 = 1;
+    private static final String ODAPI_ENTRIES_REQUEST_URL = "https://od-api.oxforddictionaries.com:443/api/v1/entries";
+    private static final int FEATURE_LOADER_ID1 = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,13 +71,13 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
             queryBundle.putString("queryWord", word);
 
             // Get our Loader by calling getLoader and passing the ID we specified
-            Loader<String> loader = loaderManager.getLoader(DEFINITION_LOADER_ID1);
+            Loader<String> loader = loaderManager.getLoader(FEATURE_LOADER_ID1);
 
             // If the Loader was null, initialize it. Else, restart it.
             if (loader == null) {
-                loaderManager.initLoader(DEFINITION_LOADER_ID1, queryBundle, this);
+                loaderManager.initLoader(FEATURE_LOADER_ID1, queryBundle, this);
             } else {
-                loaderManager.restartLoader(DEFINITION_LOADER_ID1, queryBundle, this);
+                loaderManager.restartLoader(FEATURE_LOADER_ID1, queryBundle, this);
             }
         } else {
             //Update empty state with no connection error message
@@ -97,13 +97,13 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
 
         String word = args.getString("queryWord");
 
-        Uri baseUri = Uri.parse(ODAPI_REQUEST_URL);
+        Uri baseUri = Uri.parse(ODAPI_ENTRIES_REQUEST_URL);
         Uri.Builder uriBuilder = baseUri.buildUpon();
 
-        uriBuilder.appendQueryParameter("language", "en");
-        uriBuilder.appendQueryParameter("word_id", word.toLowerCase());
+        uriBuilder.appendPath("en");
+        uriBuilder.appendPath(word.toLowerCase());
 
-        String alternateUri = ODAPI_REQUEST_URL + "/en/" + word.toLowerCase().trim();
+        String alternateUri = uriBuilder.toString();
         return new FeatureLoader(this, alternateUri, word, 1);
     }
 
@@ -117,20 +117,17 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
 
         // If there is a valid {@link definition}, then update TextView
         if (definition != null && !definition.isEmpty()) {
-            if (loader.getId() == 1)
-                showResults(definition);
+            if (loader.getId() == 1) {
+                TextView word_View = (TextView) findViewById(R.id.word);
+                TextView def_View = (TextView) findViewById(R.id.def);
+                word_View.setText(word);
+                def_View.setText(definition);
+            }
         } else {
             Toast.makeText(this, "No results found!!", Toast.LENGTH_SHORT).show();
             View SearchView = findViewById(R.id.search_view);
             SearchView.setVisibility(View.VISIBLE);
         }
-    }
-
-    public void showResults(String result){
-        TextView word_View = (TextView) findViewById(R.id.word);
-        TextView def_View = (TextView) findViewById(R.id.def);
-        word_View.setText(word);
-        def_View.setText(result);
     }
 
     @Override

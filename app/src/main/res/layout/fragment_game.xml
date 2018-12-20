@@ -28,8 +28,8 @@
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#AAFFFFFF"
-            android:layout_margin="8dp">
+            android:layout_margin="8dp"
+            android:background="#AAFFFFFF">
 
             <ProgressBar
                 android:id="@+id/loading_indicator"
@@ -51,15 +51,16 @@
                 android:id="@+id/size"
                 android:layout_width="32dp"
                 android:layout_height="wrap_content"
+                android:singleLine="true"
                 android:layout_toRightOf="@id/message_box" />
 
             <!--<TextView-->
-                <!--android:id="@+id/hint_value"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_alignParentRight="true"-->
-                <!--android:layout_centerVertical="true"-->
-                <!--android:textSize="20sp" />-->
+            <!--android:id="@+id/hint_value"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_alignParentRight="true"-->
+            <!--android:layout_centerVertical="true"-->
+            <!--android:textSize="20sp" />-->
 
             <ImageView
                 android:id="@+id/hint"
@@ -72,19 +73,19 @@
         </RelativeLayout>
 
         <LinearLayout
-            android:id="@+id/word1"
+            android:id="@+id/field1"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_margin="8dp"
-            android:background="@drawable/myrect"
+            android:background="@drawable/myrect_white"
             android:orientation="horizontal" />
 
         <LinearLayout
-            android:id="@+id/word2"
+            android:id="@+id/field2"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_margin="8dp"
-            android:background="@drawable/myrect"
+            android:background="@drawable/myrect_white"
             android:orientation="horizontal" />
 
         <RelativeLayout
@@ -98,6 +99,15 @@
                 android:layout_height="48dp"
                 android:src="@mipmap/ic_play"
                 android:text="Start" />
+
+            <Button
+                android:id="@+id/submit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:background="@drawable/myrect_black"
+                android:text="Submit"
+                android:textColor="@android:color/white" />
 
             <ImageView
                 android:id="@+id/undo"
