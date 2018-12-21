@@ -51,8 +51,8 @@
                 android:id="@+id/size"
                 android:layout_width="32dp"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:layout_toRightOf="@id/message_box" />
+                android:layout_toRightOf="@id/message_box"
+                android:singleLine="true" />
 
             <!--<TextView-->
             <!--android:id="@+id/hint_value"-->

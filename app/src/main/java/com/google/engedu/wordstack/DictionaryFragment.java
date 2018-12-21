@@ -39,6 +39,7 @@ public class DictionaryFragment extends Fragment {
 //                startActivity(i);
             }
         });
+
         getDate();
         return rootView;
     }

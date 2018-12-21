@@ -9,17 +9,19 @@
     android:gravity="bottom">
 
     <ImageView
-        android:layout_width="96dp"
-        android:layout_height="96dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginBottom="8dp"
         android:src="@drawable/wordstack"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="WordStack"
-        android:textSize="24dp"
+        android:textSize="20dp"
         android:gravity="center"
         android:textColor="@android:color/white"
+        android:layout_margin="8dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
 
 </LinearLayout>
