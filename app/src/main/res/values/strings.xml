@@ -6,6 +6,8 @@
         \n4. Use HINT button to know one word from two.\n5. Press SUBMIT after creating words.
         \n6. Hit RESET button to restart game.</string>
 
+    <string name="remove">Do you want to delete all the words in this list?</string>
+
     <string name="tab1">Dictionary</string>
     <string name="tab2">Game</string>
 

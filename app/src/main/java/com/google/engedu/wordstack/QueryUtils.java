@@ -33,11 +33,9 @@ public final class QueryUtils {
      * This class is only meant to hold static variables and methods, which can be accessed
      * directly from the class name QueryUtils (and an object instance of QueryUtils is not needed).
      */
-    private QueryUtils() {}
+    private QueryUtils() {
+    }
 
-    /**
-     * Query the OD dataset and return a {@link String} object.
-     */
     public static String fetchDetails(String requestUrl, String queryWord) throws IOException {
         Log.i(LOG_TAG, "TEST: fetchDetails() called ...");
 
@@ -133,6 +131,44 @@ public final class QueryUtils {
         return words;
     }
 
+    public static String fetchRoot(String requestUrl) throws IOException {
+        Log.i(LOG_TAG, "TEST: fetchRoot() called ...");
+
+        URL url = createUrl(requestUrl);
+        HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+
+        urlConnection.addRequestProperty("Accept", "application/json");
+        urlConnection.addRequestProperty("app_id", app_id);
+        urlConnection.addRequestProperty("app_key", app_key);
+
+        Log.v(LOG_TAG, "For Url: " + url.toString());
+
+        // Perform HTTP request to the URL and receive a JSON response back
+        String jsonResponse = null;
+
+        try {
+            jsonResponse = makeHttpRequest(urlConnection);
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Problem making the HTTP request.", e);
+        }
+
+        if (TextUtils.isEmpty(jsonResponse))
+            return null;
+
+        String root = "";
+        try {
+            JSONObject baseJSONResponse = new JSONObject(jsonResponse);
+            JSONObject resultsJSONObject = baseJSONResponse.getJSONArray("results").getJSONObject(0);
+
+            JSONObject lexicalEntriesJSONObject = resultsJSONObject.getJSONArray("lexicalEntries").getJSONObject(0);
+            JSONObject inflectionJSONObject = lexicalEntriesJSONObject.getJSONArray("inflectionOf").getJSONObject(0);
+            root = (String) inflectionJSONObject.getString("text");
+        } catch (JSONException e) {
+            Log.e("QueryUtils", "Problem parsing the definitions JSON results", e);
+        }
+        return root;
+    }
+
     /**
      * Return a list of {@link String} objects that has been built up from
      * parsing a JSON response.
@@ -163,7 +199,7 @@ public final class QueryUtils {
                     for (int k = 0; k < sensesJSONArray.length(); ++k) {
                         JSONObject sensesJSONObject = sensesJSONArray.getJSONObject(k);
 
-                        details += "\n\t" + (k+1) + ". " + (String) sensesJSONObject.getJSONArray("definitions").get(0);
+                        details += "\n\t" + (k + 1) + ". " + (String) sensesJSONObject.getJSONArray("definitions").get(0);
                         details += "\n\teg. " + (String) sensesJSONObject.getJSONArray("examples").getJSONObject(0).getString("text");
                     }
                     details += "\n";

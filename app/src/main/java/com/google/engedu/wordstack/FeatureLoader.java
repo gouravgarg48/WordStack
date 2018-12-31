@@ -31,6 +31,7 @@ public class FeatureLoader extends AsyncTaskLoader<String> {
      *  = 1 for Details
      *  = 2 for Definition
      *  = 3 for Words
+     *  = 4 for Lemmatron
      */
     private int mQType;
 
@@ -76,6 +77,8 @@ public class FeatureLoader extends AsyncTaskLoader<String> {
                 result = QueryUtils.fetchDefinition(mUrl, mWord);
             else if(mQType == 3)
                 result = QueryUtils.fetchWords(mUrl);
+            else if(mQType == 4)
+                result = QueryUtils.fetchRoot(mUrl);
 //            if(definition != null)
 //                Log.v(LOG_TAG, definition);
         } catch (IOException e) {

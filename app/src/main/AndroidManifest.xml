@@ -35,7 +35,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".SearchActivity" />
-        <activity android:name=".ListView"></activity>
+        <activity android:name=".ListView" />
+        <activity android:name=".WordDetails"></activity>
     </application>
 
 </manifest>
