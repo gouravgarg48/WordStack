@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="192dp"
-    android:background="@color/colorPrimaryDark"
     android:padding="16dp"
     android:theme="@style/ThemeOverlay.AppCompat.Dark"
     android:orientation="vertical"
@@ -12,7 +11,8 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_marginBottom="8dp"
-        android:src="@drawable/wordstack"/>
+        android:src="@drawable/wordstack"
+        android:elevation="2dp"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -20,8 +20,8 @@
         android:text="WordStack"
         android:textSize="20dp"
         android:gravity="center"
-        android:textColor="@android:color/white"
-        android:layout_margin="8dp"
+        android:textColor="@color/colorAccent"
+        android:layout_margin="4dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
 
 </LinearLayout>

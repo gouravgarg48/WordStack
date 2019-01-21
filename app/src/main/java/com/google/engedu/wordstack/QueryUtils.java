@@ -206,6 +206,8 @@ public final class QueryUtils {
                 }
                 details += "\n";
             }
+            details += lexicalEntriesJSONArray.getJSONObject(0).getJSONArray("pronunciations")
+                    .getJSONObject(0).getString("audioFile") + "\n";
 
         } catch (JSONException e) {
             Log.e("QueryUtils", "Problem parsing the definitions JSON results", e);

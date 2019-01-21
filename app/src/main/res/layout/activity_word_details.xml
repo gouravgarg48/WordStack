@@ -52,7 +52,17 @@
                         android:textSize="24sp" />
 
                     <ImageView
-                        android:id="@+id/fav"
+                        android:id="@+id/ic_sound"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_margin="4dp"
+                        android:layout_toRightOf="@id/word"
+                        android:padding="4dp"
+                        android:src="@drawable/ic_sound"
+                        android:visibility="gone" />
+
+                    <ImageView
+                        android:id="@+id/ic_fav"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:layout_alignParentRight="true"

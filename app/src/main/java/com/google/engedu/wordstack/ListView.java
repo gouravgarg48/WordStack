@@ -34,6 +34,7 @@ public class ListView extends AppCompatActivity {
         id = getIntent().getStringExtra("listId");
 
         Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitleTextColor(getResources().getColor(android.R.color.white));
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle("Search");
@@ -125,7 +126,6 @@ public class ListView extends AppCompatActivity {
                 String line = reader.readLine();
                 while (line != null) {
                     words.add(line);
-                    // read next line
                     line = reader.readLine();
                 }
                 reader.close();
@@ -141,7 +141,6 @@ public class ListView extends AppCompatActivity {
                 String line = reader.readLine();
                 while (line != null) {
                     words.add(line);
-                    // read next line
                     line = reader.readLine();
                 }
                 reader.close();

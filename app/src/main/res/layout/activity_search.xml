@@ -25,10 +25,11 @@
             android:id="@+id/search_field"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/white"
             android:layout_margin="8dp"
-            android:singleLine="true"
+            android:background="@android:color/white"
             android:hint="Type here to Search..."
+            android:singleLine="true"
+            android:textColor="@color/colorAccent"
             android:textSize="20sp" />
     </LinearLayout>
 

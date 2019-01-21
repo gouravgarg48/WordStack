@@ -1,8 +1,10 @@
-This is the starter code for the WordStack workshop. 
-This workshop is part of the Applied CS with Android course:
+WordStack App
+===================================
 
-http://g.co/cswithandroid
+This app is an English Dictionary combined with a fun learning game to increase your vocabulary.
+In WordStack game you have to create correct words from shuffled letters to win the game.
 
-Check the website for detailed instructions on how to implement this activity.
-
+More info on the Oxford Dictionary API available at:
+https://developer.oxforddictionaries.com/
+ 
 Version 1.0

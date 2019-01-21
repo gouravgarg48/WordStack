@@ -36,7 +36,7 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (//(event.getAction() == KeyEvent.ACTION_DOWN) &&
                         (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                    word = search_field.getText().toString();
+                    word = search_field.getText().toString().toLowerCase();
                     searchWord(word);
                 }return false;
             }
@@ -114,7 +114,10 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         if (res != null && !res.isEmpty()) {
             if (loader.getId() == 1) {
                 Intent intent = new Intent(getBaseContext(), WordDetails.class);
-                intent.putExtra("word", res);
+                if(res.length() > word.length())
+                    intent.putExtra("word", word);
+                else
+                    intent.putExtra("word", res);
                 startActivity(intent);
             }
         } else {

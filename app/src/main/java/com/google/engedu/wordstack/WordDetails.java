@@ -2,6 +2,8 @@ package com.google.engedu.wordstack;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -24,6 +26,7 @@ import android.widget.Toast;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -32,7 +35,7 @@ public class WordDetails extends AppCompatActivity implements LoaderManager.Load
     private static final String LOG_TAG = MainActivity.class.getName();
     private DrawerLayout mDrawerLayout;
 
-    private static String word;
+    private static String word, pUrl;
     private static final String ODAPI_ENTRIES_REQUEST_URL = "https://od-api.oxforddictionaries.com:443/api/v1/entries";
     private static final int FEATURE_LOADER_ID1 = 1;
     private ArrayList<String> wordsList = new ArrayList<>();
@@ -42,17 +45,26 @@ public class WordDetails extends AppCompatActivity implements LoaderManager.Load
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_word_details);
-        word = getIntent().getStringExtra("word");
+        word = getIntent().getStringExtra("word").toLowerCase();
         searchWord(word);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitleTextColor(getResources().getColor(android.R.color.white));
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle("Search");
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
 
-        final ImageView fav = findViewById(R.id.fav);
+        ImageView sound = findViewById(R.id.ic_sound);
+        sound.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playSound();
+            }
+        });
+
+        final ImageView fav = findViewById(R.id.ic_fav);
         try {
             FileInputStream fileIn = openFileInput("fav_words.txt");
             BufferedReader reader = new BufferedReader(new InputStreamReader(fileIn));
@@ -245,6 +257,38 @@ public class WordDetails extends AppCompatActivity implements LoaderManager.Load
         startActivity(startMain);
     }
 
+    public void playSound() {
+        try {
+            MediaPlayer mediaPlayer = new MediaPlayer();
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mediaPlayer.setDataSource(pUrl);
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+            // might take long! (for buffering, etc)
+            mediaPlayer.release();
+        } catch (Exception e){
+            Toast.makeText(this, "Error occured!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void loadDetails(String res) {
+        TextView word_View = (TextView) findViewById(R.id.word);
+        TextView def_View = (TextView) findViewById(R.id.def);
+        word_View.setText(word);
+        String[] strArr = res.split("\\n");
+        String def = "";
+        for (int i = 0; i < strArr.length - 1; i++)
+            def += strArr[i] + "\n";
+        def_View.setText(def);
+        pUrl = strArr[strArr.length - 1];
+        addToRecents();
+
+        ImageView sound = findViewById(R.id.ic_sound);
+        sound.setVisibility(View.VISIBLE);
+        ImageView fav = findViewById(R.id.ic_fav);
+        fav.setVisibility(View.VISIBLE);
+    }
+
     @Override
     public Loader<String> onCreateLoader(int id, final Bundle args) {
         // Create a new loader for the given URL
@@ -271,19 +315,13 @@ public class WordDetails extends AppCompatActivity implements LoaderManager.Load
         // Hide loading indicator because the data has been loaded
         View loadingIndicator = findViewById(R.id.loading_indicator);
         loadingIndicator.setVisibility(View.GONE);
-        ImageView fav = findViewById(R.id.fav);
 
         Log.i(LOG_TAG, "TEST: onLoadFinished() called ...");
 
         // If there is a valid {@link definition}, then update TextView
         if (definition != null && !definition.isEmpty()) {
             if (loader.getId() == 1) {
-                TextView word_View = (TextView) findViewById(R.id.word);
-                TextView def_View = (TextView) findViewById(R.id.def);
-                word_View.setText(word);
-                def_View.setText(definition);
-                addToRecents();
-                fav.setVisibility(View.VISIBLE);
+                loadDetails(definition);
             }
         } else {
             Toast.makeText(this, "No results found!!", Toast.LENGTH_SHORT).show();
